@@ -1,100 +1,104 @@
-const express = require("express");
-const cors = require("cors");
-const nodemailer = require("nodemailer");
-// const twilio = require("twilio"); // Abhi Twilio use nahi kar rahe
-require("dotenv").config();
+// const express = require("express");
+// const cors = require("cors");
+// const nodemailer = require("nodemailer");
+// const twilio = require("twilio");
+// require("dotenv").config();
 
-const app = express();
-app.use(cors({ origin: "*" }));
-app.use(express.json());
+// const app = express();
+// app.use(cors());
+// app.use(express.json());
 
-// -----------------
-// Nodemailer setup
-// -----------------
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// // -----------------
+// // Nodemailer setup
+// // -----------------
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   }
+// });
 
-// -----------------
-// Twilio setup (commented for now)
-// -----------------
+// // -----------------
+// // Twilio setup
+// // -----------------
 // const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 
-// -----------------
-// Test route
-// -----------------
-app.get("/api/test", (req, res) => {
-  res.json({ msg: "Backend is working fine 🚀" });
-});
+// // -----------------
+// // Contact form route
+// // -----------------
+// app.post("/api/contact", async (req, res) => {
+//   const { name, email, message } = req.body;
 
-// -----------------
-// Contact form route
-// -----------------
-app.post("/api/contact", async (req, res) => {
-  const { name, email, message, language } = req.body;
+//   try {
+//     // Email
+//     await transporter.sendMail({
+//       from: process.env.EMAIL_USER,
+//       to: process.env.EMAIL_USER,  // खुद को भेजो
+//       subject: `New Contact Form Submission from ${name}`,
+//       text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+//     });
 
-  try {
-    // Email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: language === "en" ? 
-        `New Contact Form Submission from ${name}` : 
-        `नया संपर्क फॉर्म संदेश ${name} से`,
-      text: language === "en" ? 
-        `Name: ${name}\nEmail: ${email}\nMessage: ${message}` :
-        `नाम: ${name}\nईमेल: ${email}\nसंदेश: ${message}`
-    });
+//     // WhatsApp
+//     await client.messages.create({
+//       from: process.env.TWILIO_WHATSAPP_NUMBER,
+//       to: process.env.MY_WHATSAPP_NUMBER,
+//       body: `New Contact Form:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`
+//     });
 
-    // WhatsApp aur SMS temporarily comment kiye gaye
-    /*
-    await client.messages.create({
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: process.env.MY_WHATSAPP_NUMBER,
-      body: `New Contact Form:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`
-    });
-    */
+//     // SMS
+//     await client.messages.create({
+//       from: process.env.TWILIO_SMS_NUMBER,
+//       to: process.env.MY_PHONE_NUMBER,
+//       body: `New Contact Form:\nName: ${name}\nEmail: ${email}\nMessage: ${message}`
+//     });
 
-    res.status(200).json({ message: language === "en" ? "Message sent successfully!" : "संदेश सफलतापूर्वक भेजा गया!" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: language === "en" ? "Failed to send message" : "संदेश भेजने में विफल" });
-  }
-});
+//     res.status(200).json({ message: "Message sent successfully!" });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Failed to send message" });
+//   }
+// });
 
-// -----------------
-// Book Havan route
-// -----------------
-app.post("/api/book-havan", async (req, res) => {
-  const { name, phone, havanType, message, language } = req.body;
+// // -----------------
+// // Book Havan route
+// // -----------------
+// app.post("/api/book-havan", async (req, res) => {
+//   const { name, phone, havanType, message } = req.body;
 
-  try {
-    // Email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: language === "en" ? 
-        `New Havan Booking from ${name}` :
-        `नई हवन बुकिंग ${name} से`,
-      text: language === "en" ? 
-        `Name: ${name}\nPhone: ${phone}\nHavan Type: ${havanType}\nMessage: ${message}` :
-        `नाम: ${name}\nफ़ोन: ${phone}\nहवन का प्रकार: ${havanType}\nसंदेश: ${message}`
-    });
+//   try {
+//     // Email
+//     await transporter.sendMail({
+//       from: process.env.EMAIL_USER,
+//       to: process.env.EMAIL_USER,
+//       subject: `New Havan Booking from ${name}`,
+//       text: `Name: ${name}\nPhone: ${phone}\nHavan Type: ${havanType}\nMessage: ${message}`
+//     });
 
-    res.status(200).json({ message: language === "en" ? "Havan booked successfully via email!" : "हवन सफलतापूर्वक बुक हुआ!" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: language === "en" ? "Failed to book Havan" : "हवन बुक करने में विफल" });
-  }
-});
+//     // WhatsApp
+//     await client.messages.create({
+//       from: process.env.TWILIO_WHATSAPP_NUMBER,
+//       to: process.env.MY_WHATSAPP_NUMBER,
+//       body: `New Havan Booking:\nName: ${name}\nPhone: ${phone}\nHavan Type: ${havanType}\nMessage: ${message}`
+//     });
 
-// -----------------
-// Start server
-// -----------------
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
-});
+//     // SMS
+//     await client.messages.create({
+//       from: process.env.TWILIO_SMS_NUMBER,
+//       to: process.env.MY_PHONE_NUMBER,
+//       body: `New Havan Booking:\nName: ${name}\nPhone: ${phone}\nHavan Type: ${havanType}\nMessage: ${message}`
+//     });
+
+//     res.status(200).json({ message: "Havan booked successfully and notifications sent!" });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Failed to book Havan" });
+//   }
+// });
+
+// // -----------------
+// // Start server
+// // -----------------
+// app.listen(process.env.PORT || 5000, () => {
+//   console.log(`Server running on port ${process.env.PORT}`);
+// });
